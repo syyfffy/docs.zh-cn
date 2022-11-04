@@ -19,16 +19,16 @@ FROM centos:centos7
 
 # Prepare StarRocks Installer.
 
-#输入Starocks的版本，例如版本：2.4.0
-ENV StarRocks_version=XXX
+#输入Starocks的版本，例如版本：2.4.0，这里可以将2.4.0修改
+ENV StarRocks_version=2.4.0
 
-#这里不建议提高
+#定义安装目录结构
 ENV StarRocks_home=/data/deploy
 
-#添加版本下载地址，
+#添加StarRocks对应版本的下载地址，
 ENV StarRocks_url=<url_to_download_specific_ver_of_starrocks>
 
-
+# Install StarRocks.
 RUN yum -y install wget
 RUN mkdir -p $StarRocks_home
 RUN wget -SO $StarRocks_home/StarRocks-${StarRocks_version}.tar.gz  $StarRocks_url
@@ -96,7 +96,6 @@ while sleep 60; do
 done
 ```
 
-> 注意：将以上 `StarRocks-x.x.x` 替换为实际安装版本。
 
 ## 搭建 Docker 镜像
 
