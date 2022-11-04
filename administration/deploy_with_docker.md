@@ -18,28 +18,40 @@
 FROM centos:centos7
 
 # Prepare StarRocks Installer.
+
+#输入Starocks的版本
+ENV StarRocks_version=XXX
+
+#这里不建议提高
+ENV StarRocks_home=/data/deploy
+
+#添加版本下载地址，
+ENV StarRocks_url=<url_to_download_specific_ver_of_starrocks>
+
+
 RUN yum -y install wget
-RUN mkdir -p /data/deploy/ 
-RUN wget -SO /data/deploy/StarRocks-x.x.x.tar.gz <url_to_download_specific_ver_of_starrocks>
-RUN cd /data/deploy/ && tar zxf StarRocks-x.x.x.tar.gz
+RUN mkdir -p $StarRocks_home
+RUN wget -SO $StarRocks_home/StarRocks-${StarRocks_version}.tar.gz  $StarRocks_url
+RUN cd $StarRocks_home && tar zxf StarRocks-${StarRocks_version}.tar.gz
+
+
 
 # Install Java JDK.
 RUN yum -y install java-1.8.0-openjdk-devel.x86_64
 RUN rpm -ql java-1.8.0-openjdk-devel.x86_64 | grep bin$
-RUN /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.342.b07-1.el7_9.x86_64/bin/java -version
 
 # Create directory for FE meta and BE storage in StarRocks.
-RUN mkdir -p /data/deploy/StarRocks-x.x.x/fe/meta
-RUN jps
-RUN mkdir -p /data/deploy/StarRocks-x.x.x/be/storage
+RUN mkdir -p $StarRocks_home/StarRocks-${StarRocks_version}/fe/meta
+RUN mkdir -p $StarRocks_home/StarRocks-${StarRocks_version}/be/storage
 
 # Install relevant tools.
 RUN yum -y install mysql net-tools telnet
 
 # Run Setup script.
-COPY run_script.sh /data/deploy/run_script.sh
-RUN chmod +x /data/deploy/run_script.sh
-CMD /data/deploy/run_script.sh
+COPY run_script.sh $StarRocks_home/run_script.sh
+RUN chmod +x $StarRocks_home/run_script.sh
+CMD $StarRocks_home/run_script.sh
+
 ```
 
 > 注意：将以上 `<url_to_download_specific_ver_of_starrocks>` 替换为实际[下载地址](https://www.starrocks.com/zh-CN/download)，并将 `StarRocks-x.x.x` 替换为实际安装版本。
@@ -49,18 +61,20 @@ CMD /data/deploy/run_script.sh
 构建脚本文件 `run_script.sh` 以配置并启动 StarRocks。
 
 ```shell
-
 #!/bin/bash
 
-# Set JAVA_HOME.
-export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.342.b07-1.el7_9.x86_64
+
+#set JAVA_HOME.
+
+JAVA_INSTALL_DIR=/usr/lib/jvm/$(rpm -aq | grep java-1.8.0-openjdk-1.8.0)
+export JAVA_HOME=$JAVA_INSTALL_DIR
 
 # Start FE.
-cd /data/deploy/StarRocks-x.x.x/fe/bin/
+cd $StarRocks_home/StarRocks-$StarRocks_version/fe/bin/
 ./start_fe.sh --daemon
 
 # Start BE.
-cd /data/deploy/StarRocks-x.x.x/be/bin/
+cd $StarRocks_home/StarRocks-StarRocks_version/be/bin/
 ./start_be.sh --daemon
 
 # Sleep until the cluster starts.
@@ -75,11 +89,12 @@ while sleep 60; do
   ps aux | grep starrocks | grep -q -v grep
   PROCESS_STATUS=$?
 
-  if [ $PROCESS_STATUS -ne 0 ]; then
+  if [ PROCESS_STATUS -ne 0 ]; then
     echo "one of the starrocks process already exit."
     exit 1;
   fi
 done
+
 ```
 
 > 注意：将以上 `StarRocks-x.x.x` 替换为实际安装版本。
