@@ -17,15 +17,13 @@
 ```shell
 FROM centos:centos7
 
-# Prepare StarRocks Installer.
-
-#输入Starocks的版本，例如版本：2.4.0，这里可以将2.4.0修改
+# Prepare StarRocks Installer. Replace the "2.4.0" below with the StarRocks version that you want to deploy.
 ENV StarRocks_version=2.4.0
 
-#定义安装目录结构
+# Create directory for deployment.
 ENV StarRocks_home=/data/deploy
 
-#添加StarRocks对应版本的下载地址，
+# Replace the "<url_to_download_specific_ver_of_starrocks>" below with the download path of the StarRocks that you want to deploy.
 ENV StarRocks_url=<url_to_download_specific_ver_of_starrocks>
 
 # Install StarRocks.
@@ -33,8 +31,6 @@ RUN yum -y install wget
 RUN mkdir -p $StarRocks_home
 RUN wget -SO $StarRocks_home/StarRocks-${StarRocks_version}.tar.gz  $StarRocks_url
 RUN cd $StarRocks_home && tar zxf StarRocks-${StarRocks_version}.tar.gz
-
-
 
 # Install Java JDK.
 RUN yum -y install java-1.8.0-openjdk-devel.x86_64
@@ -51,7 +47,6 @@ RUN yum -y install mysql net-tools telnet
 COPY run_script.sh $StarRocks_home/run_script.sh
 RUN chmod +x $StarRocks_home/run_script.sh
 CMD $StarRocks_home/run_script.sh
-
 ```
 
 > 注意：将以上 `<url_to_download_specific_ver_of_starrocks>` 替换为实际[下载地址](https://www.starrocks.com/zh-CN/download)
