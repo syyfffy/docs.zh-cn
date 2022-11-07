@@ -59,7 +59,7 @@ CMD $StarRocks_home/run_script.sh
 #!/bin/bash
 
 
-#set JAVA_HOME.
+# Set JAVA_HOME.
 
 JAVA_INSTALL_DIR=/usr/lib/jvm/$(rpm -aq | grep java-1.8.0-openjdk-1.8.0)
 export JAVA_HOME=$JAVA_INSTALL_DIR
